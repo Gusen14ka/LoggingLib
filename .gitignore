@@ -1,2 +1,5 @@
 /.cache
 /build
+/cmake-build-debug-wsl
+/.idea
+/.vscode

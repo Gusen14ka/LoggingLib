@@ -1,51 +1,75 @@
-#include "logger/logger.hpp"
 #include <chrono>
 #include <ctime>
-#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <mutex>
+#include <memory>
 #include <sstream>
 #include <string>
 
-std::string to_string(MessageLevel level){
-    switch (level) {
-        case MessageLevel::DEBUG: return "DEBUG";
-        case MessageLevel::INFO: return "INFO";
-        case MessageLevel::WARNING: return "WARNING";
-        case MessageLevel::ERROR: return "ERROR";
-    }
+#include "logger/logger.hpp"
+#include "logger/strategies/file_log_strategy.hpp"
+#include "logger/strategies/socket_log_strategy.hpp"
 
-    return "UNKNOWN";
+namespace {
+    std::string to_string(MessageLevel const level){
+        switch (level) {
+            case MessageLevel::DEBUG: return "DEBUG";
+            case MessageLevel::INFO: return "INFO";
+            case MessageLevel::WARNING: return "WARNING";
+            case MessageLevel::ERROR: return "ERROR";
+        }
+
+        return "UNKNOWN";
+    }
 }
 
-Logger::Logger(std::string const & log_file_name, MessageLevel default_level) : default_level_(default_level) {
-    log_file_.open(log_file_name);
+std::unique_ptr<ILogStrategy> Logger::build(
+        std::function<std::unique_ptr<ILogStrategy>(std::string&)> factory) {
     std::string err;
-    if (!is_valid(err)){
-        std::cerr << "Something wrong with file: " + err << std::endl;
+    auto strategy = factory(err);
+    if (!strategy) {
+        std::cerr << "Error in Logger constructing: " << err << std::endl;
+        std::cerr << "Following usage of this Logger will be affected" << std::endl;
     }
+    return strategy;
 }
 
-Logger::~Logger(){
-    log_file_.close();
-}
+Logger::Logger(std::string const & log_file_name,
+    const MessageLevel default_level) :
+        Logger(build([&](std::string& err) {
+            return FileLogStrategy::create(log_file_name, err);
+        }), default_level) {}
 
-void Logger::log(std::string const & message, MessageLevel level){
+Logger::Logger(std::string const & host, int port,
+    const MessageLevel default_level) :
+        Logger(build([&](std::string& err) {
+            return SocketLogStrategy::create(host, port, err);
+        }),default_level) {}
+
+Logger::Logger(std::unique_ptr<ILogStrategy> strategy,
+    const MessageLevel default_level) :
+        default_level_(default_level),
+        strategy_(std::move(strategy)) {}
+
+void Logger::log(std::string const & message, const MessageLevel level){
     if (level < default_level_) return;
-    std::scoped_lock<std::mutex> lock(mtx_);
-    std::string err;
-    if (!is_valid(err)){
-        std::cerr << "Something wrong with file: " + err << std::endl;
+    if (!strategy_) {
+        std::cerr << "Attempt to use Logger with null strategy" << std::endl;
         return;
     }
-    log_file_ << "["
+
+    std::ostringstream oss;
+    oss << "["
         << to_string(level)
         << "] ["
         << current_timestamp()
         << "] ["
         << message
         << "]\n";
+
+    if (std::string err; !strategy_->write(oss.str(), err)) {
+        std::cerr << "Error in Logger: " << err << std::endl;
+    }
 }
 
 void Logger::log(std::string const & message){
@@ -56,24 +80,8 @@ void Logger::change_default_level(MessageLevel level) {
     default_level_ = level;
 }
 
-bool Logger::is_valid(std::string& err) const{
-    if (!log_file_.is_open()){
-        err = "file is not open";
-        return false;
-    }
-    if (log_file_.bad()){
-        err = "irrecoverable I/O error (badbit)";
-        return false;
-    }
-    if (log_file_.fail()){
-        err = "logical error on stream (failbit)";
-        return false;
-    }
-    return true;
-}
-
 std::string Logger::current_timestamp(){
-    auto now = std::chrono::system_clock::now();
+    const auto now = std::chrono::system_clock::now();
     std::time_t time = std::chrono::system_clock::to_time_t(now);
     
     std::tm tm_buf {};
@@ -83,7 +91,7 @@ std::string Logger::current_timestamp(){
         localtime_r(&time, &tm_buf);
     #endif
 
-    auto millis = 
+    const auto millis =
         std::chrono::duration_cast<std::chrono::milliseconds>(
             now.time_since_epoch()) % 1000;
 
