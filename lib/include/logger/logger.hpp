@@ -12,9 +12,10 @@ class Logger {
     MessageLevel default_level_;
     std::unique_ptr<ILogStrategy> strategy_;
 public:
-    Logger(std::string const & log_file_name, MessageLevel default_level);
-    Logger(std::string const & host, int port, MessageLevel default_level);
-    Logger(std::unique_ptr<ILogStrategy> strategy, MessageLevel default_level);
+    static std::unique_ptr<Logger> create(std::string const & log_file_name, MessageLevel default_level);
+    static std::unique_ptr<Logger> create(std::string const & host, int port, MessageLevel default_level);
+    static std::unique_ptr<Logger> create(std::unique_ptr<ILogStrategy> strategy, MessageLevel default_level);
+
     ~Logger() = default;
     void log(std::string const & message, const MessageLevel level);
     void log(std::string const & message);
@@ -26,6 +27,7 @@ public:
 
 private:
     std::string current_timestamp();
+    Logger(std::unique_ptr<ILogStrategy> strategy, MessageLevel default_level);
     static std::unique_ptr<ILogStrategy> build(
         std::function<std::unique_ptr<ILogStrategy>(std::string&)> factory);
 };

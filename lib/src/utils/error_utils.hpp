@@ -2,4 +2,4 @@
 
 #include <string>
 
-static std::string strerror_safe(const int err);
+std::string strerror_safe(const int err);

@@ -11,7 +11,7 @@
 #include "logger/strategies/socket_log_strategy.hpp"
 
 namespace {
-    std::string to_string(MessageLevel const level){
+    std::string_view to_string(MessageLevel const level){
         switch (level) {
             case MessageLevel::DEBUG: return "DEBUG";
             case MessageLevel::INFO: return "INFO";
@@ -34,17 +34,34 @@ std::unique_ptr<ILogStrategy> Logger::build(
     return strategy;
 }
 
-Logger::Logger(std::string const & log_file_name,
-    const MessageLevel default_level) :
-        Logger(build([&](std::string& err) {
-            return FileLogStrategy::create(log_file_name, err);
-        }), default_level) {}
+std::unique_ptr<Logger> Logger::create(std::string const & log_file_name, MessageLevel default_level) {
+    auto strategy = build([&](std::string& err) {
+        return FileLogStrategy::create(log_file_name, err);
+    });
+    if (strategy) {
+        return std::unique_ptr<Logger>(new Logger(std::move(strategy), default_level));
+    }
+    return nullptr;
+}
 
-Logger::Logger(std::string const & host, int port,
-    const MessageLevel default_level) :
-        Logger(build([&](std::string& err) {
-            return SocketLogStrategy::create(host, port, err);
-        }),default_level) {}
+std::unique_ptr<Logger> Logger::create(std::string const & host, int port,
+    MessageLevel default_level) {
+    auto strategy = build([&](std::string& err) {
+        return SocketLogStrategy::create(host, port, err);
+    });
+    if (strategy) {
+        return std::unique_ptr<Logger>(new Logger(std::move(strategy), default_level));
+    }
+    return nullptr;
+}
+
+std::unique_ptr<Logger> Logger::create(std::unique_ptr<ILogStrategy> strategy,
+    MessageLevel default_level) {
+    if (strategy) {
+        return std::unique_ptr<Logger>(new Logger(std::move(strategy), default_level));
+    }
+    return nullptr;
+}
 
 Logger::Logger(std::unique_ptr<ILogStrategy> strategy,
     const MessageLevel default_level) :
@@ -53,10 +70,10 @@ Logger::Logger(std::unique_ptr<ILogStrategy> strategy,
 
 void Logger::log(std::string const & message, const MessageLevel level){
     if (level < default_level_) return;
-    if (!strategy_) {
-        std::cerr << "Attempt to use Logger with null strategy" << std::endl;
-        return;
-    }
+    // if (!strategy_) {
+    //     std::cerr << "Attempt to use Logger with null strategy" << std::endl;
+    //     return;
+    // }
 
     std::ostringstream oss;
     oss << "["
@@ -85,11 +102,7 @@ std::string Logger::current_timestamp(){
     std::time_t time = std::chrono::system_clock::to_time_t(now);
     
     std::tm tm_buf {};
-    #ifdef _WIN32
-        localtime_s(&tm_buf, &time);
-    #else
-        localtime_r(&time, &tm_buf);
-    #endif
+    localtime_r(&time, &tm_buf);
 
     const auto millis =
         std::chrono::duration_cast<std::chrono::milliseconds>(
