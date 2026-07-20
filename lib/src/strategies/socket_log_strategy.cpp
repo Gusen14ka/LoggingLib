@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "logger/strategies/socket_log_strategy.hpp"
-#include "utils/error_utils.hpp"
+#include "logger/utils/error_utils.hpp"
 
 std::unique_ptr<SocketLogStrategy> SocketLogStrategy::create(std::string const & host, int port, std::string &err) {
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -48,7 +48,11 @@ bool SocketLogStrategy::write(std::string const &message, std::string &err) {
     size_t written_bytes = 0;
     char const * data = message.c_str();
     while (written_bytes < len) {
-        ssize_t n = send(socket_fd_, data + written_bytes, len - written_bytes, 0);
+        // MSG_NOSIGNAL предотвращает SIGPIPE, который иначе может убить весь процесс,
+        // если удалённая сторона (сервер статистики) неожиданно закрыла соединение —
+        // вместо сигнала send() штатно вернёт -1 с errno == EPIPE, что мы уже
+        // обрабатываем как обычную ошибку записи.
+        ssize_t n = send(socket_fd_, data + written_bytes, len - written_bytes, MSG_NOSIGNAL);
         if (n == -1) {
             err = strerror_safe(errno);
             return false;

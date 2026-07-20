@@ -2,7 +2,7 @@
 #include <string>
 
 #include "logger/strategies/file_log_strategy.hpp"
-#include "utils/error_utils.hpp"
+#include "logger/utils/error_utils.hpp"
 
 std::unique_ptr<FileLogStrategy> FileLogStrategy::create(std::string const& log_file_name, std::string& err) {
     std::ofstream log_file(log_file_name);

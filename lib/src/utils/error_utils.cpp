@@ -1,7 +1,7 @@
 #include <string.h>
 #include <string>
 
-#include "error_utils.hpp"
+#include "logger/utils/error_utils.hpp"
 
 std::string strerror_safe(const int err)
 {

@@ -7,11 +7,11 @@
 #include <thread>
 
 class Logger;
-enum class MessageLevel;
+enum class LogLevel;
 
 struct LogMessage {
     std::string message;
-    std::optional<MessageLevel> level;
+    std::optional<LogLevel> level;
 };
 
 class LogWorker {

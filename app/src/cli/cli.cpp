@@ -3,19 +3,8 @@
 
 #include "cli.hpp"
 #include "logger/logger.hpp"
+#include "logger/log_level/log_level.hpp"
 
-namespace {
-    static std::optional<MessageLevel> log_level_from_string(std::string_view log_level) {
-        std::string str(log_level);
-        // std::transform(str.begin(), str.end(), str.begin(),
-        //     [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        if (str == "debug")   return MessageLevel::DEBUG;
-        if (str == "info")    return MessageLevel::INFO;
-        if (str == "warning") return MessageLevel::WARNING;
-        if (str == "error")   return MessageLevel::ERROR;
-        return std::nullopt;
-    }
-}
 
 std::optional<AppConfig> parse_args(int argc, char* argv[]) {
     if (argc != 3) {
@@ -35,7 +24,7 @@ std::optional<AppConfig> parse_args(int argc, char* argv[]) {
 }
 
 
-std::pair<std::string, std::optional<MessageLevel>> parse_log_level(std::string const& message) {
+std::pair<std::string, std::optional<LogLevel>> parse_log_level(std::string const& message) {
     auto space_pos = message.find(' ');
     if (space_pos != std::string::npos) {
         std::string_view first_token(message.data(), space_pos);

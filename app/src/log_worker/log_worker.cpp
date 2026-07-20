@@ -1,5 +1,3 @@
-
-
 #include "log_worker.hpp"
 #include "logger/logger.hpp"
 

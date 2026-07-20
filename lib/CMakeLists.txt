@@ -3,6 +3,8 @@ add_library(logger
         src/strategies/file_log_strategy.cpp
         src/strategies/socket_log_strategy.cpp
         src/utils/error_utils.cpp
+        src/time/time.cpp
+        src/log_level/log_level.cpp
 )
 
 find_package(Threads REQUIRED)

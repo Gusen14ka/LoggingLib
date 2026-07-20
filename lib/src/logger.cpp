@@ -1,5 +1,3 @@
-#include <chrono>
-#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -9,19 +7,8 @@
 #include "logger/logger.hpp"
 #include "logger/strategies/file_log_strategy.hpp"
 #include "logger/strategies/socket_log_strategy.hpp"
+#include "logger/time/time.hpp"
 
-namespace {
-    std::string_view to_string(MessageLevel const level){
-        switch (level) {
-            case MessageLevel::DEBUG: return "DEBUG";
-            case MessageLevel::INFO: return "INFO";
-            case MessageLevel::WARNING: return "WARNING";
-            case MessageLevel::ERROR: return "ERROR";
-        }
-
-        return "UNKNOWN";
-    }
-}
 
 std::unique_ptr<ILogStrategy> Logger::build(
         std::function<std::unique_ptr<ILogStrategy>(std::string&)> factory) {
@@ -34,7 +21,7 @@ std::unique_ptr<ILogStrategy> Logger::build(
     return strategy;
 }
 
-std::unique_ptr<Logger> Logger::create(std::string const & log_file_name, MessageLevel default_level) {
+std::unique_ptr<Logger> Logger::create(std::string const & log_file_name, LogLevel default_level) {
     auto strategy = build([&](std::string& err) {
         return FileLogStrategy::create(log_file_name, err);
     });
@@ -45,7 +32,7 @@ std::unique_ptr<Logger> Logger::create(std::string const & log_file_name, Messag
 }
 
 std::unique_ptr<Logger> Logger::create(std::string const & host, int port,
-    MessageLevel default_level) {
+    LogLevel default_level) {
     auto strategy = build([&](std::string& err) {
         return SocketLogStrategy::create(host, port, err);
     });
@@ -56,7 +43,7 @@ std::unique_ptr<Logger> Logger::create(std::string const & host, int port,
 }
 
 std::unique_ptr<Logger> Logger::create(std::unique_ptr<ILogStrategy> strategy,
-    MessageLevel default_level) {
+    LogLevel default_level) {
     if (strategy) {
         return std::unique_ptr<Logger>(new Logger(std::move(strategy), default_level));
     }
@@ -64,16 +51,12 @@ std::unique_ptr<Logger> Logger::create(std::unique_ptr<ILogStrategy> strategy,
 }
 
 Logger::Logger(std::unique_ptr<ILogStrategy> strategy,
-    const MessageLevel default_level) :
+    const LogLevel default_level) :
         default_level_(default_level),
         strategy_(std::move(strategy)) {}
 
-void Logger::log(std::string const & message, const MessageLevel level){
+void Logger::log(std::string const & message, const LogLevel level){
     if (level < default_level_) return;
-    // if (!strategy_) {
-    //     std::cerr << "Attempt to use Logger with null strategy" << std::endl;
-    //     return;
-    // }
 
     std::ostringstream oss;
     oss << "["
@@ -93,27 +76,6 @@ void Logger::log(std::string const & message){
     log(message, default_level_);
 }
 
-void Logger::change_default_level(MessageLevel level) {
+void Logger::change_default_level(LogLevel level) {
     default_level_ = level;
-}
-
-std::string Logger::current_timestamp(){
-    const auto now = std::chrono::system_clock::now();
-    std::time_t time = std::chrono::system_clock::to_time_t(now);
-    
-    std::tm tm_buf {};
-    localtime_r(&time, &tm_buf);
-
-    const auto millis =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            now.time_since_epoch()) % 1000;
-
-    std::ostringstream oss;
-    oss << std::put_time(&tm_buf, "%Y-%m-%d %H:%M:%S")
-        << ":"
-        << std::setfill('0')
-        << std::setw(3)
-        << millis.count();
-
-    return oss.str();
 }
