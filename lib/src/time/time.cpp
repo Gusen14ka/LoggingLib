@@ -43,13 +43,34 @@ std::optional<std::chrono::system_clock::time_point> parse_timestamp(std::string
         return std::nullopt;
     }
     ss >> millis;
-    if (ss.fail() || millis < 0 || millis > 999) {
+    if (ss.fail() || millis < 0 || millis > 999 || !ss.eof()) {
         return std::nullopt;
     }
 
+    // Делаем явную проверку, что значения в допустимом диапазоне
+    if (tm.tm_sec < 0 || tm.tm_sec > 59 ||
+        tm.tm_min < 0 || tm.tm_min > 59 ||
+        tm.tm_hour < 0 || tm.tm_hour > 23 ||
+        tm.tm_mon < 0 || tm.tm_mon > 11 ||
+        tm.tm_mday < 1 || tm.tm_mday > 31) {
+        return std::nullopt;
+    }
+
+
+    std::tm original = tm; // копия дл дальнейшей проверки
     std::time_t time = std::mktime(&tm);
     if (time == static_cast<std::time_t>(-1)) {
         return std::nullopt;  // tm содержал невозможную дату (например, 32 февраля)
+    }
+
+    // Явно проверяем, что после парсинга и каста значения остались теми же
+    if (tm.tm_year != original.tm_year ||
+        tm.tm_mon  != original.tm_mon  ||
+        tm.tm_mday != original.tm_mday ||
+        tm.tm_hour != original.tm_hour ||
+        tm.tm_min  != original.tm_min  ||
+        tm.tm_sec  != original.tm_sec) {
+        return std::nullopt;
     }
 
     auto tp = std::chrono::system_clock::from_time_t(time);
