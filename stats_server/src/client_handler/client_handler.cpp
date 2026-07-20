@@ -3,7 +3,7 @@
 #include <ostream>
 #include <unistd.h>
 
-#include "client_hendler.hpp"
+#include "client_handler.hpp"
 #include "logger/utils/error_utils.hpp"
 #include "log_entry/log_entry.hpp"
 #include "print_stats/print_stats.hpp"
@@ -12,7 +12,10 @@ namespace {
     constexpr size_t CHUNK_SIZE = 4096;
 }
 
-void handle_client(int client_fd, Statistics& statistics, std::mutex& cout_mtx, size_t N) {
+void handle_client(int client_fd, Statistics& statistics, std::mutex& cout_mtx,
+                    size_t report_message_interval, ClientRegistry& registry) {
+    registry.add(client_fd);
+
     std::string buffer;
     char chunk[CHUNK_SIZE];
 
@@ -25,10 +28,11 @@ void handle_client(int client_fd, Statistics& statistics, std::mutex& cout_mtx, 
             break;
         }
 
-        // 0 — клиент закрыл соединение
+        // штатное закрытие — как обычным клиентом, так и через shutdown_all()
         if (bytes_read == 0) {
             break;
         }
+
         buffer.append(chunk, bytes_read);
 
         size_t sep;
@@ -49,11 +53,12 @@ void handle_client(int client_fd, Statistics& statistics, std::mutex& cout_mtx, 
                 std::cout << line << std::endl;
             }
 
-            if (statistics.update(*entry) % N == 0) {
+            if (statistics.update(*entry) % report_message_interval == 0) {
                 std::scoped_lock<std::mutex> lock(cout_mtx);
                 print_stats(statistics.snapshot(), std::cout, "(message count)");
             }
         }
     }
+    registry.remove(client_fd);
     close(client_fd);
 }
