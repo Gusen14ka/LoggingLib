@@ -1,6 +1,10 @@
 #include "statistics.hpp"
 
 
+// Snapshot возвращается целиком, не отдельным счётчиком: если бы вызывающий
+// код делал отдельный update() + snapshot(), между ними лок отпускается,
+// и параллельный update() из другого потока может "увести" total_count —
+// триггер на N-е сообщение промахивается. Возврат из-под одного лока это устраняет.
 Snapshot Statistics::update(LogEntry const &entry) {
     std::scoped_lock<std::mutex> lock(mtx_);
     snapshot_.total_count++;

@@ -7,6 +7,10 @@
 #include <logger/strategies/log_strategy.hpp>
 #include <logger/log_level/log_level.hpp>
 
+// Логирует текстовые сообщения с фильтрацией по уровню важности.
+// Не бросает исключений: ошибки записи выводятся в stderr, программа продолжает работать.
+// Создаётся через статические Logger::create(...) — конструктор приватный,
+// это гарантирует, что успешно созданный объект всегда полностью работоспособен.
 class Logger {
     LogLevel default_level_;
     std::unique_ptr<ILogStrategy> strategy_;

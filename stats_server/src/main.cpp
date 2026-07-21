@@ -19,6 +19,8 @@
 #include "timer/timer.hpp"
 
 namespace {
+// Self-pipe trick: обработчику сигнала нельзя делать почти ничего безопасно,
+// кроме write() в pipe. poll() видит его наравне с остальными дескрипторами.
 int g_shutdown_pipe[2] = {-1, -1};
 
 void handle_signal(int) {
@@ -47,7 +49,7 @@ int main(int argc, char** argv) {
     struct sigaction sa {};
     sa.sa_handler = handle_signal;
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
+    sa.sa_flags = 0; // без SA_RESTART — прерванный poll() должен вернуть управление, не перезапускаться сам
     sigaction(SIGINT, &sa, nullptr);
     sigaction(SIGTERM, &sa, nullptr);
 
@@ -117,8 +119,6 @@ int main(int argc, char** argv) {
     bool shutting_down = false;
 
     while (true) {
-        // for (auto& pfd : fds) pfd.revents = 0; // Зачем?
-
         // Бесконечно ожидаем собитие
         int ready = poll(fds.data(), fds.size(), -1);
         if (ready == -1) {

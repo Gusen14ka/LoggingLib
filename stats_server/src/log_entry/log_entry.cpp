@@ -11,7 +11,8 @@ LogEntry::LogEntry(LogLevel level,
         : level(level), timestamp(timestamp), text(std::move(text)) {}
 
 
-
+// Строка из сокета — ненадёжный ввод. size_t беззнаковый: вычитание без
+// проверки на потенциальный underflow — UB, а не просто неверный результат.
 std::unique_ptr<LogEntry> LogEntry::parse(std::string const & message) {
     constexpr std::string_view separator = "] [";
     // размер пустого шаблона "[] [] []" равен 8

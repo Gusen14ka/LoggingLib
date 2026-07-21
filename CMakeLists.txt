@@ -2,15 +2,21 @@ cmake_minimum_required(VERSION 3.10)
 
 project(LoggingLib)
 
+enable_testing()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+option(BUILD_SHARED_LIBS "Build logger as a shared library" OFF)
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/app)
 add_subdirectory(${PROJECT_SOURCE_DIR}/stats_server)
-
-option(BUILD_SHARED_LIBS "Build logger as a shared library" OFF)
 
 option(BUILD_TESTS "Build unit tests" ON)
 if(BUILD_TESTS)

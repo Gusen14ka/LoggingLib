@@ -13,6 +13,8 @@ void ClientRegistry::remove(int fd) {
     clients_.erase(fd);
 }
 
+// shutdown(), не close(): будим чужой recv() в другом потоке, не отбирая
+// сам fd — его закроет владеющий поток после join().
 void ClientRegistry::shutdown_all() {
     std::scoped_lock lock(mtx_);
     for (int fd : clients_) {
