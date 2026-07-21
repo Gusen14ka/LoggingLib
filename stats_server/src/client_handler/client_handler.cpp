@@ -13,7 +13,8 @@ namespace {
 }
 
 void handle_client(int client_fd, Statistics& statistics, std::mutex& cout_mtx,
-                    size_t report_message_interval, ClientRegistry& registry) {
+                    size_t report_message_interval, ClientRegistry& registry,
+                    int completion_write_fd) {
     registry.add(client_fd);
 
     std::string buffer;
@@ -60,5 +61,10 @@ void handle_client(int client_fd, Statistics& statistics, std::mutex& cout_mtx,
         }
     }
     registry.remove(client_fd);
-    close(client_fd);
+
+    // Сообщаем main, что этот client_fd можно закрывать и джойнить.
+    // write() atomic для размеров <= PIPE_BUF (обычно 4096), так что несколько
+    // потоков могут безопасно писать одновременно без взаимной порчи данных —
+    // каждая запись int'а (4 байта) видна на другой стороне целиком, не вперемешку.
+    write(completion_write_fd, &client_fd, sizeof(client_fd));
 }

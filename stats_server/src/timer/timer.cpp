@@ -1,9 +1,6 @@
-
-
-#include "timer.hpp"
-
 #include <iostream>
 
+#include "timer.hpp"
 #include "print_stats/print_stats.hpp"
 
 

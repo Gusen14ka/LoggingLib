@@ -1,0 +1,2 @@
+add_executable(socket_demo_client main.cpp)
+target_link_libraries(socket_demo_client PRIVATE logger)

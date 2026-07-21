@@ -37,7 +37,6 @@ TEST(TimestampUtils, CurentTimeProducesCorrectString) {
     auto cur = current_timestamp();
     // Отбрасываем миллисекунды (в них будет различие)
     auto sub_cur = cur.substr(0, cur.length() - 3);
-    std::cout << sub_cur << std::endl;
 
     auto now = std::chrono::system_clock::now();
     // отбрасываем под-миллисекундную точность, так как формат хранит только до мс

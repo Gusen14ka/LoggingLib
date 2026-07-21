@@ -5,16 +5,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-add_executable(tests
-        lib/test_log_level.cpp
-        lib/test_timestamps.cpp
-        lib/test_error_utils.cpp
-#        test_log_entry.cpp
-#        test_statistics.cpp
-#        test_logger.cpp
-)
-
-target_link_libraries(tests PRIVATE logger gtest_main)
-
 include(GoogleTest)
-gtest_discover_tests(tests)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/stats_server)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/manual/socket_demo_client)
