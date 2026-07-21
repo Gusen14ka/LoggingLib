@@ -9,6 +9,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/app)
 add_subdirectory(${PROJECT_SOURCE_DIR}/stats_server)
-add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 
 option(BUILD_SHARED_LIBS "Build logger as a shared library" OFF)
+
+option(BUILD_TESTS "Build unit tests" ON)
+if(BUILD_TESTS)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
+endif()

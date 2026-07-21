@@ -1,5 +1,6 @@
 #include <chrono>
 #include <string>
+#include <thread>
 
 #include <gtest/gtest.h>
 #include "statistics/statistics.hpp"
@@ -104,4 +105,37 @@ TEST(StatisticsTest, SnapshotEqualityReflectsState) {
 
     auto second_read = stats.snapshot();
     EXPECT_TRUE(after_update == second_read);       // без изменений между вызовами — снимки идентичны
+}
+
+TEST(StatisticsTest, ConcurrentUpdatesReturnConsistentSnapshots) {
+    Statistics stats;
+    constexpr int kThreads = 8;
+    constexpr int kMessagesPerThread = 50;
+
+    std::vector<std::thread> threads;
+    std::mutex seen_mtx;
+    std::set<size_t> seen_totals;  // все total_count, реально возвращённые из update()
+
+    for (int t = 0; t < kThreads; t++) {
+        threads.emplace_back([&, t]() {
+            for (int i = 0; i < kMessagesPerThread; i++) {
+                auto entry = make_entry(LogLevel::INFO, std::chrono::seconds(0),
+                                         "msg " + std::to_string(t) + "-" + std::to_string(i));
+                ASSERT_TRUE(entry);
+                auto snap = stats.update(*entry);
+
+                std::scoped_lock lock(seen_mtx);
+                seen_totals.insert(snap.total_count);
+            }
+        });
+    }
+    for (auto& th : threads) th.join();
+
+    // Если бы update() и snapshot() были раздельными вызовами,
+    // некоторые значения total_count были бы пропущены (два потока увидели бы
+    // одно и то же "уехавшее" число). При корректной реализации КАЖДОЕ число
+    // от 1 до kThreads*kMessagesPerThread встречается ровно один раз.
+    EXPECT_EQ(seen_totals.size(), static_cast<size_t>(kThreads * kMessagesPerThread));
+    EXPECT_EQ(*seen_totals.begin(), 1);
+    EXPECT_EQ(*seen_totals.rbegin(), static_cast<size_t>(kThreads * kMessagesPerThread));
 }

@@ -8,6 +8,6 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib)
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/app)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/stats_server)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/manual/socket_demo_client)

@@ -54,7 +54,7 @@ std::optional<AppConfig> parse_args(int argc, char* argv[]) {
     }
 
     return AppConfig{argv[1], *port,
-        static_cast<size_t>(*report_interval),
-        static_cast<size_t>(*report_messages_interval)};
+        static_cast<size_t>(*report_messages_interval),
+        static_cast<size_t>(*report_interval)};
 
 }
