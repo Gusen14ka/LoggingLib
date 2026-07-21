@@ -7,6 +7,7 @@
 
 #include <logger/logger.hpp>
 
+
 namespace {
 
 constexpr LogLevel kAllLevels[] = {

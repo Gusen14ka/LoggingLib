@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "cli/cli.hpp"
 
+
 namespace {
     char* to_cstr(std::string& s) { return s.data(); }
 }

@@ -1,10 +1,9 @@
 #include <iostream>
 #include <charconv>
-#include <cstring>
+#include <cstdint>
 
 #include "cli.hpp"
 
-#include <cstdint>
 
 namespace {
     template <typename T>
@@ -23,7 +22,6 @@ namespace {
         return value;
     }
 }
-
 
 std::optional<AppConfig> parse_args(int argc, char* argv[]) {
     if (argc != 5) {

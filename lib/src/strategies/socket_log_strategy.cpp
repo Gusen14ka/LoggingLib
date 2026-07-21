@@ -7,6 +7,7 @@
 #include "logger/strategies/socket_log_strategy.hpp"
 #include "logger/utils/error_utils.hpp"
 
+
 std::unique_ptr<SocketLogStrategy> SocketLogStrategy::create(std::string const & host, int port, std::string &err) {
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_fd == -1) {

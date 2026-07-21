@@ -1,7 +1,9 @@
-#include <gtest/gtest.h>
 #include <sstream>
+
+#include <gtest/gtest.h>
 #include "print_stats/print_stats.hpp"
 #include "statistics/statistics.hpp"
+
 
 TEST(StatsPrinterTest, OutputContainsAllKeyNumbers) {
     Snapshot snap;

@@ -8,8 +8,8 @@
 #include "logger/time/time.hpp"
 #include "logger/log_level/log_level.hpp"
 
-namespace {
 
+namespace {
 // Строит строку "[LEVEL] [timestamp] [text]" для заданного смещения от текущего момента,
 // затем парсит её через LogEntry::parse — так тест использует тот же путь разбора,
 // что и реальный клиент по сокету, вместо обхода приватного конструктора LogEntry.
@@ -22,7 +22,6 @@ std::unique_ptr<LogEntry> make_entry(LogLevel level,
                         + format_timestamp(tp) + "] [" + text + "]";
     return LogEntry::parse(line);
 }
-
 }  // namespace
 
 TEST(StatisticsTest, TracksTotalCountAndPerLevel) {

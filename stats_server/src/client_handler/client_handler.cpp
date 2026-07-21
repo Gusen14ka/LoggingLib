@@ -8,6 +8,7 @@
 #include "log_entry/log_entry.hpp"
 #include "print_stats/print_stats.hpp"
 
+
 namespace {
     constexpr size_t CHUNK_SIZE = 4096;
 }

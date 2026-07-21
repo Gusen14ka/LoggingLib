@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-
 #include "logger/log_level/log_level.hpp"
 #include "cli/cli.hpp"
+
 
 namespace {
     char* to_cstr(std::string& s) { return s.data(); }

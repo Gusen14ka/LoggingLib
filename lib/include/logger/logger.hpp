@@ -7,6 +7,7 @@
 #include <logger/strategies/log_strategy.hpp>
 #include <logger/log_level/log_level.hpp>
 
+
 // Логирует текстовые сообщения с фильтрацией по уровню важности.
 // Не бросает исключений: ошибки записи выводятся в stderr, программа продолжает работать.
 // Создаётся через статические Logger::create(...) — конструктор приватный,
@@ -24,7 +25,6 @@ public:
     void log(std::string const & message);
     void change_default_level(LogLevel level);
 
-    // TODO: Дописать все 6 к-тор и опер-ов
     Logger(Logger const & o) = delete;
     Logger& operator=(Logger const & o) = delete;
 

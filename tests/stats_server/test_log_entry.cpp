@@ -2,6 +2,7 @@
 #include "log_entry/log_entry.hpp"
 #include "logger/log_level/log_level.hpp"
 
+
 TEST(LogEntryTest, ParsesValidLine) {
     auto entry = LogEntry::parse("[ERROR] [2026-07-19 16:23:54:135] [Connection refused]");
     ASSERT_NE(entry, nullptr);

@@ -4,6 +4,7 @@
 #include "logger/strategies/file_log_strategy.hpp"
 #include "logger/utils/error_utils.hpp"
 
+
 std::unique_ptr<FileLogStrategy> FileLogStrategy::create(std::string const& log_file_name, std::string& err) {
     std::ofstream log_file(log_file_name);
     if (!log_file.is_open()) {

@@ -18,6 +18,7 @@
 #include "client_registry/client_registry.hpp"
 #include "timer/timer.hpp"
 
+
 namespace {
 // Self-pipe trick: обработчику сигнала нельзя делать почти ничего безопасно,
 // кроме write() в pipe. poll() видит его наравне с остальными дескрипторами.

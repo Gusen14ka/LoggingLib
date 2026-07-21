@@ -3,6 +3,7 @@
 
 #include "logger/utils/error_utils.hpp"
 
+
 std::string strerror_safe(const int err)
 {
     char buffer[256];

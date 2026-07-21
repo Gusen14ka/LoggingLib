@@ -1,6 +1,8 @@
 #pragma once
+
 #include <optional>
 #include <string>
+
 
 struct AppConfig {
     std::string host;

@@ -1,10 +1,12 @@
 #pragma once
+
 #include <array>
 #include <chrono>
 #include <mutex>
 #include <set>
 
 #include "log_entry/log_entry.hpp"
+
 
 struct Snapshot {
     size_t total_count = 0; // за всё время

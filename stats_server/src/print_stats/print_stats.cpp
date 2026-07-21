@@ -1,5 +1,6 @@
 #include "print_stats.hpp"
 
+
 void print_stats(Snapshot const& snap, std::ostream& out, std::string_view cause) {
     out << "--- Statistics " << cause << " ---\n"
         << "Total messages: " << snap.total_count << "\n"
