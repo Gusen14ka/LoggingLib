@@ -1,7 +1,7 @@
 #include "statistics.hpp"
 
 
-size_t Statistics::update(LogEntry const &entry) {
+Snapshot Statistics::update(LogEntry const &entry) {
     std::scoped_lock<std::mutex> lock(mtx_);
     snapshot_.total_count++;
     snapshot_.per_level_count[static_cast<size_t>(entry.level)]++;
@@ -13,7 +13,7 @@ size_t Statistics::update(LogEntry const &entry) {
     recent_timestamps_.insert(entry.timestamp);
     snapshot_.last_hour_count = pop_old_timestamps(std::chrono::system_clock::now());
 
-    return snapshot_.total_count;
+    return snapshot_;
 }
 
 size_t Statistics::pop_old_timestamps(std::chrono::system_clock::time_point now) {

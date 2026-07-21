@@ -86,8 +86,8 @@ TEST(StatisticsTest, UpdateReturnsRunningTotalCount) {
     auto e2 = make_entry(LogLevel::INFO, std::chrono::seconds(0), "b");
     ASSERT_TRUE(e1 && e2);
 
-    EXPECT_EQ(stats.update(*e1), 1);
-    EXPECT_EQ(stats.update(*e2), 2);
+    EXPECT_EQ(stats.update(*e1).total_count, 1);
+    EXPECT_EQ(stats.update(*e2).total_count, 2);
 }
 
 TEST(StatisticsTest, SnapshotEqualityReflectsState) {

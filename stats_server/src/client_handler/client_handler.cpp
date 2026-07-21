@@ -54,9 +54,9 @@ void handle_client(int client_fd, Statistics& statistics, std::mutex& cout_mtx,
                 std::cout << line << std::endl;
             }
 
-            if (statistics.update(*entry) % report_message_interval == 0) {
+            if (auto snap = statistics.update(*entry); snap.total_count % report_message_interval == 0) {
                 std::scoped_lock<std::mutex> lock(cout_mtx);
-                print_stats(statistics.snapshot(), std::cout, "(message count)");
+                print_stats(snap, std::cout, "(message count)");
             }
         }
     }

@@ -26,7 +26,7 @@ class Statistics {
 public:
     Statistics() = default;
     // Возвращает число зафиксированных записей
-    size_t update(LogEntry const &entry);
+    Snapshot update(LogEntry const &entry);
     Snapshot snapshot() const;
     void print() const;
 
