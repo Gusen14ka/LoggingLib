@@ -10,6 +10,7 @@
 #include <csignal>
 #include <poll.h>
 #include <fcntl.h>
+#include <unordered_map>
 
 #include "log_entry/log_entry.hpp"
 #include "logger/utils/error_utils.hpp"
